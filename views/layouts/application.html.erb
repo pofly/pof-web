@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href='https://fonts.googleapis.com/css?family=NTR' rel='stylesheet' type='text/css'>
+  <title>Print On Fly</title>
+   <link rel="icon" type="image/ico" href="/logo_pof.ico">
+   <link rel="stylesheet" href="ukit/css/uikit.min.css" />
+   <script src="/jquery-1.12.0.min.js"></script>
+   <script src="/jquery.cookie.js"></script>
+   <script src="ukit/js/uikit.min.js"></script>
+  <%= stylesheet_link_tag    'application', media: 'all', 'data-turbolinks-track' => true %>
+  <%= javascript_include_tag 'application', 'data-turbolinks-track' => true %>
+  <%= csrf_meta_tags %>
+</head>
+<script type="text/javascript">
+	var pofdb = 'localhost';
+  	function getUrlVars()
+	  {
+	      var vars = [], hash;
+	      var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+	      for(var i = 0; i < hashes.length; i++)
+	      {
+	          hash = hashes[i].split('=');
+	          vars.push(hash[0]);
+	          vars[hash[0]] = hash[1];
+	      }
+	      return vars;
+	  }
+	  function logout(){
+      	document.cookie = 'email = '+$.cookie("email")+';expires=Thu, 01 Jan 1970 00:00:01 GMT;path=/';
+      	document.cookie = 'name = '+$.cookie("name")+';expires=Thu, 01 Jan 1970 00:00:01 GMT;path=/';
+      	window.location='/';
+   }	
+</script>
+<body style="overflow-x: hidden;">
+
+<%= yield %>
+
+</body>
+</html>

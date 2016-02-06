@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href='https://fonts.googleapis.com/css?family=NTR' rel='stylesheet' type='text/css'>
+  <title>Print On Fly</title>
+   <link rel="icon" type="image/ico" href="/logo_pof.ico">
+   <link rel="stylesheet" href="ukit/css/uikit.min.css" />
+   <script src="/jquery-1.12.0.min.js"></script>
+   <script src="/jquery.cookie.js"></script>
+   <script src="ukit/js/uikit.min.js"></script>
+</head>
+<script type="text/javascript">
+    var pofdb = 'localhost';
+    function getUrlVars()
+      {
+          var vars = [], hash;
+          var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+          for(var i = 0; i < hashes.length; i++)
+          {
+              hash = hashes[i].split('=');
+              vars.push(hash[0]);
+              vars[hash[0]] = hash[1];
+          }
+          return vars;
+      }
+      function logout(){
+        document.cookie = 'email = '+$.cookie("email")+';expires=Thu, 01 Jan 1970 00:00:01 GMT;path=/';
+        document.cookie = 'name = '+$.cookie("name")+';expires=Thu, 01 Jan 1970 00:00:01 GMT;path=/';
+        window.location='/';
+   }    
+</script>
+<body style="overflow-x: hidden;">
+<!-- AUTH SCRIPTS -->
+<script type="text/javascript"> 
+    if ($.cookie("email") != null) {
+        window.location='/home';
+  }
+</script>
+<!-- TOP BAR -->
+<nav class="uk-navbar">  
+    <ul class="uk-navbar-nav uk-hidden-small">
+    	<a href="/" class="uk-navbar-brand"><img style="max-height:30px;" src="/logo_pof.ico"></a>
+        <li><a href="/about">About</a></li>
+        <li><a href="/contact">Contact</a></li>
+        <li><a href="/faqs">FAQs</a></li>
+    </ul>
+
+    <a href="#offcanvas-1" class="uk-navbar-toggle uk-visible-small" data-uk-offcanvas></a>
+</nav>
+<!-- SIDE BAR RESPONSIVE -->
+<div id="offcanvas-1" class="uk-offcanvas"> 
+    <div class="uk-offcanvas-bar">
+        <div class="uk-panel">
+        <a href="/" class="uk-navbar-brand"><img style="max-height:60px;" src="/logo_pof.svg"></a>
+        </div>
+        <br/><br/>
+        <div class="uk-panel">
+        	<a href="/about">About</a>
+        </div>
+        <div class="uk-panel">
+        	<a href="/contact">Contact</a>
+        </div>
+        <div class="uk-panel">
+        	<a href="/faqs">FAQs</a>
+        </div>
+    </div>
+</div>
+<br/>
+<br/>
+<!-- PANELS -->
+<div class="uk-grid"> 
+	<div class="uk-container-center">
+		<img style="height:100px;" src="/logo_pof.svg">
+        <br/>
+        <br/>
+        <br/>
+        <!-- LOGIN PANEL -->
+        <div class="uk-form" id="log"> 
+            <fieldset>
+                <legend>Login</legend>
+                <input class="uk-form-row" type="text" placeholder="Email" id="lmail">
+                <br/><br/>
+                <input class="uk-form-row" type="password" placeholder="Password" id="lpass">
+                <br/><br/>
+                <button class="uk-button" onclick="login()" id="lbut">Login</button>
+            </fieldset>
+            <br/>
+            <label><a href="/login?type=signup">New User? SignUp!</a></label>
+        </div>
+        <!-- REGISTER PANEL -->
+        <div class="uk-form" id="reg" style="display:none;"> 
+            <fieldset>
+                <legend>Register</legend>
+                <input class="uk-form-row" type="text" placeholder="Name" id="rname">
+                <br/><br/> 
+                <input class="uk-form-row" type="text" placeholder="Email" id="rmail">
+                <br/><br/> 
+                <input class="uk-form-row" type="text" placeholder="Phone Number" id="rphone">
+                <br/><br/>
+                <input class="uk-form-row" type="password" placeholder="Password" id="rpass">
+                <br/><br/>
+                <input class="uk-form-row" type="password" placeholder="Confirm Password" id="rcpass">
+                <br/><br/>
+                <button class="uk-button" onclick="register()" id="rbut">Register</button>
+            </fieldset>
+            <br/>
+            <label><a href="/login">Have an account? Login!</a></label>
+        </div>
+
+        <div class="uk-alert uk-alert-danger" data-uk-alert style="display:none;" id="error">
+            <a class="uk-close" onclick="document.getElementById('error').style.display = 'none';"></a>
+            <p id="err"></p>
+        </div>
+	</div>
+</div>
+
+<script type="text/javascript">
+var dat;
+    if(getUrlVars()['type'] == 'signup'){
+        document.getElementById('log').style.display = 'none';
+        document.getElementById('reg').style.display = 'block';
+    }
+    function register(){
+        $('#rbut').html("loading...");
+        document.getElementById("rbut").disabled = true;
+        var rname = $('#rname').val();
+        var rmail = $('#rmail').val();
+        var rphone = $('#rphone').val();
+        var rpass = $('#rpass').val();
+        var rcpass = $('#rcpass').val();
+
+        if(rname == '' || rmail == '' || rphone == '' || rpass == '' || rcpass == ''){
+            document.getElementById('error').style.display = 'block';
+            $('#err').html("Some fields are empty, fill them all!");
+        }
+        else{
+            $('#error').hide();
+            if(rcpass != rpass){
+                document.getElementById('error').style.display = 'block';
+                $('#err').html("Passwords dont match!");
+            }
+            else{
+                $('#error').hide();
+                $.ajax({
+                  type: "GET",
+                  url: '/pof_api/login/register/'+rname+'/'+rmail+'/'+rphone+'/'+rpass,
+                  dataType: 'json',
+                  success:function( data ) {
+                    dat = data;
+                        if(data.code == '1'){
+                            document.getElementById('error').style.display = 'block';
+                            $('#err').html(data.msg);
+                        }
+                        else if(data.code == '0'){
+                            var now = new Date();
+                            var time = now.getTime();
+                            var expireTime = time + ((1000*36000)/10)*2;
+                            now.setTime(expireTime);
+                            document.cookie = 'name='+rname+';expires='+now.toGMTString()+';path=/';
+                            document.cookie = 'email='+rmail+';expires='+now.toGMTString()+';path=/';
+                            window.location='/home';
+                        } 
+                    }
+                });
+            }
+        }
+        $('#rbut').html("Register");
+        document.getElementById("rbut").disabled = false;
+    }
+    function login(){
+        $('#lbut').html("loading...");
+        document.getElementById("lbut").disabled = true;
+        var lmail = $('#lmail').val();
+        var lpass = $('#lpass').val();
+         if(lmail == '' || lpass == '' ){
+            document.getElementById('error').style.display = 'block';
+            $('#err').html("Some fields are empty, fill them all!");
+        }
+        else{
+            $('#error').hide();
+            $.ajax({
+              type: "GET",
+              url: '/pof_api/login/login/'+lmail+'/'+lpass,
+              dataType: 'json',
+              success:function( data ) {
+                    if(data.code == '1' || data.code == '2'){
+                        document.getElementById('error').style.display = 'block';
+                        $('#err').html(data.msg);
+                    }
+                    else if(data.code == '0'){
+                        var now = new Date();
+                        var time = now.getTime();
+                        var expireTime = time + ((1000*36000)/10)*2;
+                        now.setTime(expireTime);
+                        document.cookie = 'name='+data.name+';expires='+now.toGMTString()+';path=/';
+                        document.cookie = 'email='+lmail+';expires='+now.toGMTString()+';path=/';
+                        window.location='/home';
+                    } 
+                }
+            });
+        }
+        $('#lbut').html("Login");
+        document.getElementById("lbut").disabled = false;
+    }
+</script>
+
+</body>
+</html>
